@@ -4,6 +4,8 @@ namespace Ambev.DeveloperEvaluation.Common.Validation;
 
 public class ValidationErrorDetail
 {
+    public string PropertyName { get; set; } = string.Empty;
+    public string ErrorMessage { get; set; } = string.Empty;
     public string Error { get; init; } = string.Empty;
     public string Detail { get; init; } = string.Empty;
 

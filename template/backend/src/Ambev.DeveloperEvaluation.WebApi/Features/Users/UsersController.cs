@@ -13,8 +13,7 @@ using Ambev.DeveloperEvaluation.Application.Users.UpdateUser;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.ListUsers;
 using Ambev.DeveloperEvaluation.Application.Users.ListUser;
 using Ambev.DeveloperEvaluation.WebApi.Mappers;
-using FluentValidation;
-using Ambev.DeveloperEvaluation.Application.Users;
+using Ambev.DeveloperEvaluation.Common.Validation;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users;
 
@@ -54,7 +53,18 @@ public class UsersController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+        {
+            return BadRequest(new ApiResponseWithData<object>
+            {
+                Success = false,
+                Message = "Validation failed",
+                Data = validationResult.Errors.Select(e => new
+                {
+                    PropertyName = e.PropertyName,
+                    ErrorMessage = e.ErrorMessage
+                }).ToList()
+            });
+        }
 
         var command = _mapper.Map<CreateUserCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
@@ -68,7 +78,7 @@ public class UsersController : BaseController
     }
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(ApiResponseWithData<UpdateUserResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseWithData<UpdateUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUserRequest request,
         CancellationToken cancellationToken)
@@ -77,19 +87,40 @@ public class UsersController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(error => new ValidationErrorDetail
+                {
+                    PropertyName = error.PropertyName,
+                    ErrorMessage = error.ErrorMessage
+                }).ToList()
+            });
+        }
 
         var command = _mapper.Map<UpdateUserCommand>(request) with { Id = id };
 
         var response = await _mediator.Send(command, cancellationToken);
 
-        return Ok(new ApiResponseWithData<UpdateUserResult>
+        if (response.Success == false)
+        {
+            return NotFound(new ApiResponse
+            {
+                Success = false,
+                Message = $"User with ID {id} not found."
+            });
+        }
+
+        return Ok(new ApiResponseWithData<UpdateUserResponse>
         {
             Success = true,
             Message = "User updated successfully",
-            Data = response
+            Data = _mapper.Map<UpdateUserResponse>(response)
         });
     }
+
     /// <summary>
     /// Retrieves a user by their ID
     /// </summary>
@@ -112,14 +143,12 @@ public class UsersController : BaseController
         var command = _mapper.Map<GetUserQuery>(request.Id);
         var response = await _mediator.Send(command, cancellationToken);
 
-        return Ok(response);
-
-        //return Ok(new ApiResponseWithData<GetUserResponse>
-        //{
-        //    Success = true,
-        //    Message = "User retrieved successfully",
-        //    Data = _mapper.Map<GetUserResponse>(response)
-        //});
+        return Ok(new ApiResponseWithData<GetUserResponse>
+        {
+            Success = true,
+            Message = "User retrieved successfully",
+            Data = _mapper.Map<GetUserResponse>(response)
+        });
     }
 
     /// <summary>
@@ -150,20 +179,18 @@ public class UsersController : BaseController
         int totalPages = (int)Math.Ceiling((double)response.TotalItems / command.Size);
 
         var formattedResponse = UserMapper.MapUserResponse(
-        response.Items,
-        response.TotalItems,
-        response.PageNumber,
-        totalPages
-    );
-        return Ok(formattedResponse);
+            response.Items,
+            response.TotalItems,
+            response.PageNumber,
+            totalPages
+        );
 
-        // Retorna a resposta no formato desejado
-        //return Ok(new
-        //{
-        //    success = true,
-        //    message = "Users retrieved successfully",
-        //    data = formattedResponse
-        //});
+        return Ok(new
+        {
+            success = true,
+            message = "Users retrieved successfully",
+            data = formattedResponse
+        });
     }
 
     /// <summary>
@@ -183,15 +210,36 @@ public class UsersController : BaseController
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 
         if (!validationResult.IsValid)
-            return BadRequest(validationResult.Errors);
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(error => new ValidationErrorDetail
+                {
+                    PropertyName = error.PropertyName,
+                    ErrorMessage = error.ErrorMessage
+                }).ToList()
+            });
+        }
 
         var command = _mapper.Map<DeleteUserCommand>(request.Id);
-        await _mediator.Send(command, cancellationToken);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (!result.Success)
+        {
+            return NotFound(new ApiResponse
+            {
+                Success = false,
+                Message = result.Message
+            });
+        }
 
         return Ok(new ApiResponse
         {
             Success = true,
             Message = "User deleted successfully"
         });
+        
     }
 }

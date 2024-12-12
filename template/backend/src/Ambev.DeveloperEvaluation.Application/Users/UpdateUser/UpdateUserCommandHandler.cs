@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Models.UserAggregate;
+﻿using Ambev.DeveloperEvaluation.Common.Validation;
+using Ambev.DeveloperEvaluation.Domain.Models.UserAggregate;
 using Ambev.DeveloperEvaluation.Domain.Models.UserAggregate.Common;
 using Ambev.DeveloperEvaluation.Domain.Models.UserAggregate.Entities;
 using AutoMapper;
@@ -24,13 +25,31 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, Updat
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
-            throw new ValidationException(validationResult.Errors);
+        {
+            return new UpdateUserResult
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                {
+                    PropertyName = e.PropertyName,
+                    ErrorMessage = e.ErrorMessage
+                }).ToList()
+            };
+        }
 
         // Fetch the user entity from the repository by Id.
-        var user = await _userRepository.GetByIdAsync(command.Id, cancellationToken)
-                   ?? throw new Exception($"User with Id {command.Id} not found.");
+        var user = await _userRepository.GetByIdAsync(command.Id, cancellationToken);
 
-        // Update user fields, including Name and Address.
+        if (user == null)
+        {
+            return new UpdateUserResult
+            {
+                Success = false,
+                Message = $"User with Id {command.Id} not found."
+            };
+        }
+
         user.Update(
             command.Username,
             command.Password,
