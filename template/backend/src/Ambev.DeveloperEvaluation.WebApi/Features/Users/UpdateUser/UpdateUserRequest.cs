@@ -9,11 +9,6 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Users.UpdateUser;
 public class UpdateUserRequest
 {
     /// <summary>
-    /// Gets or sets the unique identifier of the user to be updated.
-    /// </summary>
-    public Guid Id { get; set; }
-
-    /// <summary>
     /// Gets or sets the user's email address. Must be a valid email format.
     /// </summary>
     public string? Email { get; set; }

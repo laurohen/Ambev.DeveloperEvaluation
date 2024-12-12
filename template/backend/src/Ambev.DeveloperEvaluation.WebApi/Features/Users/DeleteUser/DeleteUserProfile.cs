@@ -15,5 +15,6 @@ public class DeleteUserProfile : Profile
     {
         CreateMap<Guid, DeleteUserCommand>()
             .ConstructUsing(id => new DeleteUserCommand(id));
+        CreateMap<DeleteUserResult, DeleteUserResponse>();
     }
 }
