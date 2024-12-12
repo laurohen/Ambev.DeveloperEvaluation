@@ -100,6 +100,15 @@ public class ProductsController : ControllerBase
         var command = _mapper.Map<CreateProductCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
 
+        if (response == null || !response.Success)
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = response?.Message ?? "Product creation failed."
+            });
+        }
+
         return Created(string.Empty, new ApiResponseWithData<CreateProductResponse>
         {
             Success = true,

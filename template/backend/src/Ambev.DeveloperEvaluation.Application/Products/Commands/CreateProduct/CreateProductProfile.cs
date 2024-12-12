@@ -8,36 +8,22 @@ using System.Threading.Tasks;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.Commands.CreateProduct
 {
+    /// <summary>
+    /// AutoMapper profile for mapping between CreateProduct command, entities, and results.
+    /// </summary>
     public class CreateProductProfile : Profile
     {
         public CreateProductProfile()
         {
-            //CreateMap<CreateProductCommand, Product>()
-            //.ConstructUsing(command =>
-            //    new Product(
-            //        command.Title,
-            //        command.Price,
-            //        command.Description,
-            //        command.Image,
-            //        new ProductRating(Guid.NewGuid(), (decimal)command.Rating.Rate, command.Rating.Count),
-            //        Guid.NewGuid() 
-            //    )
-            //);
-
-
-            //CreateMap<Product, CreateProductResult>()
-            //    .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => new ProductRatingDto((double)src.Rating.Rate, src.Rating.Count)));
-
             CreateMap<CreateProductCommand, Product>()
-            .ForMember(dest => dest.CategoryId, opt => opt.Ignore()) 
-            .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => new ProductRating(Guid.NewGuid(), src.Rating.Rate, src.Rating.Count)));
+                .ForMember(dest => dest.CategoryId, opt => opt.Ignore())
+                .ForMember(dest => dest.Rate, opt => opt.MapFrom(src => src.Rating.Rate))
+                .ForMember(dest => dest.Count, opt => opt.MapFrom(src => src.Rating.Count))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
 
             CreateMap<Product, CreateProductResult>()
-                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => new ProductRatingDto(src.Rating.Rate, src.Rating.Count)));
-
-            //CreateMap<CreateProductCommand, Product>();
-            //CreateMap<Product, CreateProductResult>();
-            CreateMap<ProductRatingDto, ProductRating>().ReverseMap();
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.Rating, opt => opt.MapFrom(src => new ProductRatingDto(src.Rate, src.Count)));
         }
     }
 }

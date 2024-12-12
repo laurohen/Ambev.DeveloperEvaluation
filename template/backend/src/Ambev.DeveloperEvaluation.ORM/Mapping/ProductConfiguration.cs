@@ -29,26 +29,17 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
             builder.Property(p => p.Image)
                 .HasMaxLength(500);
 
-            // Configure the relationship with Category
+            builder.Property(p => p.Rate)
+                .IsRequired()
+                .HasPrecision(3, 1);
+
+            builder.Property(p => p.Count)
+                .IsRequired();
+
             builder.HasOne(p => p.Category)
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
-                .IsRequired();
-
-            //builder.OwnsOne(p => p.Rating, rating =>
-            //{
-            //    rating.Property(r => r.Rate).HasPrecision(3, 2);
-            //    rating.Property(r => r.Count).IsRequired();
-            //});
-
-            //builder.HasMany<ProductRating>()
-            //   .WithOne()
-            //   .HasForeignKey(pr => pr.ProductId)
-            //   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne<ProductRating>()
-                .WithOne()
-                .HasForeignKey<ProductRating>(pr => pr.ProductId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
 
 

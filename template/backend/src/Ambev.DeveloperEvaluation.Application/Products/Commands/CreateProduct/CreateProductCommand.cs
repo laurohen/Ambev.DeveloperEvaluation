@@ -12,17 +12,26 @@ namespace Ambev.DeveloperEvaluation.Application.Products.Commands.CreateProduct
     /// Command for creating a new product.
     /// </summary>
     public record CreateProductCommand(
-        string Title,
-        decimal Price,
-        string Description,
-        string Category,
-        string Image,
-        ProductRatingDto Rating
-    ) : IRequest<CreateProductResult>;
-
+    string Title,
+    decimal Price,
+    string Description,
+    string Category,
+    string Image,
+    ProductRatingDto Rating
+) : IRequest<CreateProductResult>;
 
     /// <summary>
-    /// Represents the rating information of a product.
+    /// Represents the rating details of a product.
     /// </summary>
-    public sealed record ProductRatingDto(double Rate, int Count);
+    public sealed record ProductRatingDto
+    {
+        public double Rate { get; init; }
+        public int Count { get; init; }
+
+        public ProductRatingDto(double rate, int count)
+        {
+            Rate = rate;
+            Count = count;
+        }
+    }
 }
