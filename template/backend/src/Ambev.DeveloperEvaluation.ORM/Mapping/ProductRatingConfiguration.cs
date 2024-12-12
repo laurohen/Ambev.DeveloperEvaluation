@@ -12,32 +12,37 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
     /// <summary>
     /// Configuration for ProductRating entity.
     /// </summary>
-    public class ProductRatingConfiguration : IEntityTypeConfiguration<ProductRating>
-    {
-        public void Configure(EntityTypeBuilder<ProductRating> builder)
-        {
-            builder.HasKey(pr => pr.Id);
+    //public class ProductRatingConfiguration : IEntityTypeConfiguration<ProductRating>
+    //{
+    //    public void Configure(EntityTypeBuilder<ProductRating> builder)
+    //    {
+    //        builder.HasKey(pr => pr.Id);
 
-            builder.Property(pr => pr.Rate)
-                .IsRequired()
-                .HasPrecision(3, 1);
+    //        builder.Property(pr => pr.Rate)
+    //            .IsRequired()
+    //            .HasPrecision(3, 1);
 
-            builder.Property(pr => pr.Count)
-                .IsRequired();
+    //        builder.Property(pr => pr.Count)
+    //            .IsRequired();
 
-            builder.Property(pr => pr.ProductId)
-                .IsRequired();
+    //        builder.HasOne<Product>()
+    //            .WithOne(p => p.Rating)
+    //            .HasForeignKey<ProductRating>(pr => pr.Id)
+    //            .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne<Product>()
-            .WithOne()
-            .HasForeignKey<ProductRating>(pr => pr.ProductId);
+    //        //builder.Property(pr => pr.Id)
+    //        //    .IsRequired();
 
-            //builder.HasOne<Product>() 
-            //    .WithMany()
-            //    .HasForeignKey(pr => pr.ProductId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+    //        //builder.HasOne<Product>()
+    //        //.WithOne()
+    //        //.HasForeignKey<ProductRating>(pr => pr.Id);
 
-            builder.ToTable("ProductRatings");
-        }
-    }
+    //        //builder.HasOne<Product>() 
+    //        //    .WithMany()
+    //        //    .HasForeignKey(pr => pr.ProductId)
+    //        //    .OnDelete(DeleteBehavior.Cascade);
+
+    //        builder.ToTable("ProductRatings");
+    //    }
+    //}
 }

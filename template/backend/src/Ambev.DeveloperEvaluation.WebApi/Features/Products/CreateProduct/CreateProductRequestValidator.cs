@@ -2,7 +2,7 @@
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct
 {
-    /// <summary>
+    // <summary>
     /// Validator for CreateProductRequest.
     /// </summary>
     public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
@@ -12,8 +12,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct
             RuleFor(product => product.Title)
                 .NotEmpty()
                 .NotNull()
-                .Length(3, 50)
-                .WithMessage("Title must be between 3 and 50 characters long and cannot be empty.");
+                .Length(3, 100)
+                .WithMessage("Title must be between 3 and 100 characters long and cannot be empty.");
 
             RuleFor(product => product.Price)
                 .NotEmpty()

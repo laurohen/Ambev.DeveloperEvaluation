@@ -9,7 +9,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct
         {
             CreateMap<CreateProductRequest, CreateProductCommand>();
             CreateMap<ProductRatingRequest, ProductRatingDto>();
-            CreateMap<CreateProductResult, CreateProductResponse>();
+            CreateMap<CreateProductResult, CreateProductResponse>().ReverseMap();
         }
     }
 }

@@ -57,7 +57,6 @@ public class ProductRepository : IProductRepository
     {
         var query = _context.Products.Include(p => p.Category).AsQueryable();
 
-        // Apply filters
         if (filters != null)
         {
             foreach (var filter in filters)
@@ -66,17 +65,16 @@ public class ProductRepository : IProductRepository
                 {
                     query = query.Where(p => p.Category.Name == filter.Value);
                 }
-                // Add more filters as needed
+               
             }
         }
 
-        // Apply ordering
+        
         if (!string.IsNullOrEmpty(order))
         {
             query = ApplyOrdering(query, order);
         }
 
-        // Apply pagination
         var paginatedProducts = await query
             .Skip((page - 1) * size)
             .Take(size)
@@ -106,7 +104,6 @@ public class ProductRepository : IProductRepository
             .Where(p => p.Category.Name == category)
             .AsNoTracking();
 
-        // Apply ordering
         if (!string.IsNullOrEmpty(order))
         {
             query = ApplyOrdering(query, order);

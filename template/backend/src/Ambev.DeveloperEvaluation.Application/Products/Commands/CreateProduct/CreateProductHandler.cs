@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using Ambev.DeveloperEvaluation.Domain.Models.CategoryAggregate;
+using Ambev.DeveloperEvaluation.Common.Validation;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.Commands.CreateProduct
 {
@@ -40,49 +41,50 @@ namespace Ambev.DeveloperEvaluation.Application.Products.Commands.CreateProduct
         {
             var validator = new CreateProductCommandValidator();
             var validationResult = await validator.ValidateAsync(command, cancellationToken);
+            //if (!validationResult.IsValid)
+            //    throw new ValidationException(validationResult.Errors);
+
             if (!validationResult.IsValid)
-                throw new ValidationException(validationResult.Errors);
+            {
+                return new CreateProductResult
+                {
+                    Success = false,
+                    Message = "Validation failed.",
+                    Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                    {
+                        PropertyName = e.PropertyName,
+                        ErrorMessage = e.ErrorMessage
+                    }).ToList()
+                };
+            }
 
             var category = await _categoryRepository.GetByNameAsync(command.Category, cancellationToken);
             if (category == null)
             {
-                return null;
+                return new CreateProductResult
+                {
+                    Success = false,
+                    Message = $"Category '{command.Category}' not found.",
+                    Errors = new List<ValidationErrorDetail>
+                    {
+                        new ValidationErrorDetail
+                        {
+                            PropertyName = "Category",
+                            ErrorMessage = "The specified category does not exist."
+                        }
+                    }
+                };
             }
 
-            var product = new Product(
-                 command.Title,
-                 command.Price,
-                 command.Description,
-                 command.Image,
-                 _mapper.Map<ProductRating>(command.Rating),
-                 category.Id
-             );
+            var product = _mapper.Map<Product>(command);
+            product.AssignCategory(category.Id);
 
             var createdProduct = await _productRepository.CreateAsync(product, cancellationToken);
 
-            return new CreateProductResult(
-                createdProduct.Id,
-                createdProduct.Title,
-                createdProduct.Price,
-                createdProduct.Description,
-                category.Name,
-                createdProduct.Image,
-                _mapper.Map<ProductRatingDto>(createdProduct.Rating)
-            );
-
-            //var createdProduct = await _productRepository.CreateAsync(product, cancellationToken);
-
-            //return _mapper.Map<CreateProductResult>(createdProduct);
-
-            // Map the command to the Product entity
-            //var product = _mapper.Map<Product>(command);
-
-            //// Save the product to the repository
-            //var createdProduct = await _productRepository.CreateAsync(product, cancellationToken);
-
-            //// Map the created product to the result
-            //var result = _mapper.Map<CreateProductResult>(createdProduct);
-            //return result;
+            var result = _mapper.Map<CreateProductResult>(createdProduct);
+            result.Success = true;
+            result.Message = "Product created successfully.";
+            return result;
         }
     }
 

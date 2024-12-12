@@ -28,7 +28,18 @@ namespace Ambev.DeveloperEvaluation.Application.Products.Commands.UpdateProduct
             if (product == null)
                 return null;
 
-            product.UpdateDetails(command.Title, command.Price, command.Description, command.Image, command.Category, _mapper.Map<ProductRating>(command.Rating));
+            var rate = command.Rating.Rate;
+            var count = command.Rating.Count;
+
+            product.UpdateDetails(
+                command.Title,
+                command.Price,
+                command.Description,
+                command.Image,
+                command.Category,
+                rate,
+                count
+            );
 
             var updatedProduct = await _productRepository.UpdateAsync(product, cancellationToken);
 

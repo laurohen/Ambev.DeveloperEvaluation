@@ -15,7 +15,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Models.ProductAggregate.Entities
         /// <summary>
         /// The ID of the product this rating belongs to.
         /// </summary>
-        public Guid ProductId { get; private set; }
+        public Guid Id { get; private set; }
 
         /// <summary>
         /// The average rate of the product (0 to 5).
@@ -29,11 +29,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Models.ProductAggregate.Entities
 
         private ProductRating() { }
 
-        public ProductRating(Guid productId, double rate, int count)
+        public ProductRating(Guid id, double rate, int count)
         {
             Validate(rate, count);
 
-            ProductId = productId;
+            Id = id;
             Rate = rate;
             Count = count;
         }
