@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Ambev.DeveloperEvaluation.Application.Categories.DTOs;
+using Ambev.DeveloperEvaluation.Common.Validation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,19 +13,10 @@ namespace Ambev.DeveloperEvaluation.Application.Categories.Queries.GetCategories
     /// </summary>
     public class GetCategoryResult
     {
-        /// <summary>
-        /// The unique identifier of the category.
-        /// </summary>
-        public Guid Id { get; set; }
-
-        /// <summary>
-        /// The name of the category.
-        /// </summary>
-        public string Name { get; set; } = string.Empty;
-
-        /// <summary>
-        /// A brief description of the category.
-        /// </summary>
-        public string Description { get; set; } = string.Empty;
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<ValidationErrorDetail>? Errors { get; set; }
+        public CategoryDto? Data { get; set; }
     }
+
 }

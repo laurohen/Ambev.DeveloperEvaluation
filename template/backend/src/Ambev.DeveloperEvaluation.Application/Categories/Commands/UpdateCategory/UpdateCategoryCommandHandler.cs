@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Models.CategoryAggregate;
+﻿using Ambev.DeveloperEvaluation.Common.Validation;
+using Ambev.DeveloperEvaluation.Domain.Models.CategoryAggregate;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -31,17 +32,32 @@ namespace Ambev.DeveloperEvaluation.Application.Categories.Commands.UpdateCatego
 
             if (!validationResult.IsValid)
             {
-                throw new ValidationException(validationResult.Errors);
+                return new UpdateCategoryResult
+                {
+                    Success = false,
+                    Message = "Validation failed",
+                    Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                    {
+                        PropertyName = e.PropertyName,
+                        ErrorMessage = e.ErrorMessage
+                    }).ToList()
+                };
             }
 
             var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken);
             if (category == null)
             {
-                throw new KeyNotFoundException($"Category with ID {request.Id} not found.");
+                return new UpdateCategoryResult
+                {
+                    Success = false,
+                    Message = $"Category with Id {request.Id} not found."
+                };
             }
 
             category.UpdateDetails(request.Name, request.Description);
+
             var updatedCategory = await _categoryRepository.UpdateAsync(category, cancellationToken);
+
             return _mapper.Map<UpdateCategoryResult>(updatedCategory);
         }
     }

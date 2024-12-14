@@ -1,4 +1,6 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Models.CategoryAggregate;
+﻿using Ambev.DeveloperEvaluation.Application.Categories.DTOs;
+using Ambev.DeveloperEvaluation.Common.Validation;
+using Ambev.DeveloperEvaluation.Domain.Models.CategoryAggregate;
 using AutoMapper;
 using MediatR;
 using System;
@@ -36,17 +38,42 @@ namespace Ambev.DeveloperEvaluation.Application.Categories.Queries.GetCategories
         /// <returns>The category result if found; otherwise, null.</returns>
         public async Task<GetCategoryResult?> Handle(GetCategoryQuery request, CancellationToken cancellationToken)
         {
+            var validator = new GetCategoryQueryValidator();
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+            if (!validationResult.IsValid)
+            {
+                return new GetCategoryResult
+                {
+                    Success = false,
+                    Message = "Validation failed.",
+                    Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                    {
+                        PropertyName = e.PropertyName,
+                        ErrorMessage = e.ErrorMessage
+                    }).ToList()
+                };
+            }
+
             // Fetch the category by ID
             var category = await _categoryRepository.GetByIdAsync(request.Id, cancellationToken);
 
-            // If not found, return null
             if (category == null)
             {
-                return null;
+                return new GetCategoryResult
+                {
+                    Success = false,
+                    Message = $"Category with ID {request.Id} not found."
+                };
             }
 
             // Map the entity to the result DTO
-            return _mapper.Map<GetCategoryResult>(category);
+            return new GetCategoryResult
+            {
+                Success = true,
+                Message = "Category retrieved successfully.",
+                Data = _mapper.Map<CategoryDto>(category)
+            };
         }
     }
 }

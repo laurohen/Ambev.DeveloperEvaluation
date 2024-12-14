@@ -14,11 +14,11 @@ namespace Ambev.DeveloperEvaluation.Application.Categories.Commands.UpdateCatego
     {
         public Guid Id { get; init; }
         public string Name { get; init; } = string.Empty;
-        public string? Description { get; init; }
+        public string Description { get; init; } = string.Empty;
 
         public UpdateCategoryCommand() { }
 
-        public UpdateCategoryCommand(Guid id, string name, string? description)
+        public UpdateCategoryCommand(Guid id, string name, string description)
         {
             Id = id;
             Name = name;
